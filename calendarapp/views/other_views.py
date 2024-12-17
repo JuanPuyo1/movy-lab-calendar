@@ -244,3 +244,20 @@ def next_day(request, event_id):
         return JsonResponse({'message': 'Sucess!'})
     else:
         return JsonResponse({'message': 'Error!'}, status=400)
+
+
+@login_required
+def update_event(request, event_id):
+    print("HOLA")
+    event = get_object_or_404(Event, id=event_id)
+    print(event)
+    if request.method == 'POST':
+        
+        #event.title = request.POST.get('title')
+        event.description = request.POST.get('description')
+        event.start_time = request.POST.get('start_time')
+        event.end_time = request.POST.get('end_time')
+        event.save()
+        return JsonResponse({'message': 'Success!'})
+    else:
+        return JsonResponse({'message': 'Error!'}, status=400)

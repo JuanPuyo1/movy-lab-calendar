@@ -15,6 +15,7 @@ urlpatterns = [
     path("event/new-tentative-event/", views.TentativeEventCreateView.as_view(), name="event_new_tentative"),
     path("event/edit/<int:pk>/", views.EventEdit.as_view(), name="event_edit"),
     path("event/<int:event_id>/details/", views.event_details, name="event-detail"),
+    path('update_event/<int:event_id>/', views.update_event, name='update_event'),
     path(
         "add_eventmember/<int:event_id>", views.add_eventmember, name="add_eventmember"
     ),

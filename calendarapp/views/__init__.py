@@ -12,6 +12,7 @@ from .other_views import (
     delete_event,
     next_week,
     next_day,
+    update_event,
 )
 
 

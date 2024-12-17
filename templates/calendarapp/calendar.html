@@ -134,30 +134,34 @@
                               <span aria-hidden="true">&times;</span>
                           </button>
                       </div>
-                      <form method="">
+                      <form method="POST" id="editEventForm">
                           {% csrf_token %}
                           <div class="modal-body">
                               
                               <div class="form-group">
                                   <label for="message-text" class="col-form-label">Descripción:</label>
-                                  {{ form.description }}
+                                  <textarea class="form-control" id="description_event_detail" name="description"></textarea>
                                   
                               </div>
                               <div class="form-group">
                                   <label for="message-text" class="col-form-label">Fecha de inicio:</label>
+                                  {% comment "" %}
                                   <p id = "start_event_detail">
+                                  {% endcomment %}
+                                <input type="datetime-local" class="form-control" id="start_event_detail" name="start_time">
+
                               </div>
                               <div class="form-group">
                                   <label for="message-text" class="col-form-label">Fecha de finalización:</label>
-                                  <p id = "end_event_detail">
+                                    <input type="datetime-local" class="form-control" id="end_event_detail" name="end_time">
                               </div>
                           </div>
                           <div class="modal-footer">
                               <button id="delete-event-button" data-event-id="" type="button" class="btn btn-danger">Delete</button>
                               <button id="add-to-next-week" data-event-id-week="" type="button" class="btn btn-success">Next Week</button>
                               <button id="add-to-next-day" data-event-id-day="" type="button" class="btn btn-primary">Next Day</button>
-
-                          </div>
+                              <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </div>
                       </form>
                   </div>
               </div>
@@ -239,30 +243,34 @@
           
           console.log('clicked')
           var title = arg.event.title;
-          var start = formatDateTime(arg.event.start) ;
-          var end = formatDateTime(arg.event.end);
+          var startFormatted = converterDataParaDjangoFormat(arg.event.start);
+          var endFormatted = converterDataParaDjangoFormat(arg.event.end);
           var description = arg.event.extendedProps.description || '';
           var id = arg.event.id;
-
-          var modalInputEnd = document.getElementById('end_event_detail'); 
+          console.log(id)
+          //var modalInputEnd = document.getElementById('end_event_detail'); 
 
           var modal = document.getElementById('detailModal')
           var modalTitle = document.getElementById('title_event_detail'); 
           var modalStart = document.getElementById('start_event_detail'); 
           var modalEnd = document.getElementById('end_event_detail'); 
           var modalDescripition = document.getElementById('description_event_detail'); 
+
+
           var deleteButton = document.getElementById("delete-event-button");
           var nextWeek = document.getElementById("add-to-next-week");
           var nextDay = document.getElementById("add-to-next-day");
-
+          
           deleteButton.setAttribute("data-event-id", id);
           nextWeek.setAttribute("data-event-id-week", id);
           nextDay.setAttribute("data-event-id-day", id);
+          
+
           modal.style.display = 'block' 
           
           modalTitle.textContent = title;
-          modalStart.textContent = start;
-          modalEnd.textContent = end;
+          modalStart.value = startFormatted;
+          modalEnd.value = endFormatted;
           modalDescripition.textContent = description;
           
          
@@ -316,8 +324,36 @@
       const dataFormatada = new Date(dateTime).toLocaleDateString('en-US', options);
       return dataFormatada;
     };
+
+    document.getElementById('editEventForm').addEventListener('submit', function(e) {
+        
+        const eventId = document.getElementById('delete-event-button').getAttribute('data-event-id');
+
+        console.log(eventId);
+        const formData = new FormData(this);
+        console.log(formData);
+        if (confirm('Are you sure you want add this event to next week?')) {
+        $.ajax({
+            url: `/update_event/${eventId}/`,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                alert('Event updated successfully!');
+                window.location.reload();
+            },
+            error: function(xhr, status, error) {
+                alert('Error updating event!');
+            }
+        });
+    }
+    });
+
+
     document.getElementById('delete-event-button').addEventListener('click', function() {
       const eventId = this.getAttribute('data-event-id');
+      console.log(eventId);
       if (confirm('Are you sure you want to delete this event?')) {
           $.ajax({
               url: `/delete_event/${eventId}/`,
@@ -334,7 +370,8 @@
               }
           
           });
-      }});
+      }
+    });
       
       document.getElementById('add-to-next-week').addEventListener('click', function() {
           const eventId = this.getAttribute('data-event-id-week');
