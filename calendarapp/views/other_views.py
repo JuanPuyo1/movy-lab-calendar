@@ -12,7 +12,7 @@ from django.urls import reverse_lazy, reverse
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 
-from calendarapp.models import EventMember, Event, EventCalendar
+from calendarapp.models import EventMember, Event, EventCalendar, Patient
 from calendarapp.utils import Calendar
 from calendarapp.forms import EventForm, AddMemberForm
 
@@ -244,10 +244,34 @@ def update_event(request, event_id):
     if request.method == 'POST':
         
         #event.title = request.POST.get('title')
+        print(request.POST.get('diagnosis'))
+        print(event.event.diagnosis)
         event.event.diagnosis = request.POST.get('diagnosis')
+        event.event.save()
         event.start_time = request.POST.get('start_time')
         event.end_time = request.POST.get('end_time')
         event.save()
         return JsonResponse({'message': 'Success!'})
     else:
         return JsonResponse({'message': 'Error!'}, status=400)
+    
+
+def create_patient(request):
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name')
+        print(first_name)
+        last_name = request.POST.get('last_name')
+        print(last_name)
+        document_id = request.POST.get('DocumentId')
+        print(document_id)
+        
+        patient = Patient.objects.create(
+            first_name=first_name,
+            last_name=last_name,
+            DocumentId=document_id
+        )
+        
+        return JsonResponse({
+            'patient_id': patient.id,
+            'patient_name': f"{patient.first_name} {patient.last_name} {patient.DocumentId}"
+        })

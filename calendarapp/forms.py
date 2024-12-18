@@ -8,7 +8,7 @@ class EventForm(ModelForm):
         model = Event
         fields = ["patient", "diagnosis", "user", "event_type","start_time", "end_time"]
         widgets = {
-            "patient": forms.Select(attrs={"class": "form-control"}),
+            "patient": forms.Select(attrs={"class": "form-control", "id": "id_patient"}),
             "diagnosis": forms.Textarea(
                 attrs={
                     "class": "form-control",

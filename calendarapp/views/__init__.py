@@ -13,6 +13,7 @@ from .other_views import (
     next_week,
     next_day,
     update_event,
+    create_patient,
 )
 
 
