@@ -84,7 +84,7 @@
                 <div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
                         <div class="modal-header bg-primary">
-                            <h5 class="modal-title text-white" id="exampleModalLongTitle">Add New Event</h5>
+                            <h5 class="modal-title text-white" id="exampleModalLongTitle">Añadir Nuevo Evento</h5>
                             <button id="modalClose1" type="button" class="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -93,21 +93,18 @@
                             {% csrf_token %}
                             <div class="modal-body">
                                 <div class="form-group">
-                                    <label for="recipient-name" class="col-form-label">Título del Evento:</label>
-                                    {{ form.title }}
+                                    <label for="message-text" class="col-form-label">Paciente:</label>
+                                    {{ form.patient }}
                                 </div>
                                 <div class="form-group">
                                     <label for="message-text" class="col-form-label">Descripción:</label>
-                                    {{ form.description }}
+                                    {{ form.diagnosis }}
                                 </div>
                                 <div class="form-group">
                                     <label for="message-text" class="col-form-label">Solicitud:</label>
-                                    {{ form.request }}
+                                    {{ form.event_type }}
                                 </div>
-                                <div class="form-group">
-                                    <label for="message-text" class="col-form-label">Usuarios:</label>
-                                    {{ form.user.as_widget }}
-                                </div>
+                                
                                 <div class="form-group">
                                     <label for="message-text" class="col-form-label">Fecha de inicio:</label>
                                     {{ form.start_time }}
@@ -129,7 +126,7 @@
               <div class="modal-dialog modal-dialog-centered" role="document">
                   <div class="modal-content">
                       <div class="modal-header bg-primary">
-                          <h5 class="modal-title text-white" id="title_event_detail"></h5>
+                        <h5 class="modal-title text-white">Editar Evento</h5>
                           <button id="modalDetailClose" type="button" class="close" data-dismiss="modal" aria-label="Close">
                               <span aria-hidden="true">&times;</span>
                           </button>
@@ -139,8 +136,8 @@
                           <div class="modal-body">
                               
                               <div class="form-group">
-                                  <label for="message-text" class="col-form-label">Descripción:</label>
-                                  <textarea class="form-control" id="description_event_detail" name="description"></textarea>
+                                  <label for="message-text" class="col-form-label">Diagnostico:</label>
+                                  <textarea class="form-control" id="diagnosis_event_detail" name="diagnosis"></textarea>
                                   
                               </div>
                               <div class="form-group">
@@ -242,19 +239,16 @@
         eventClick: function(arg) {
           
           console.log('clicked')
-          var title = arg.event.title;
           var startFormatted = converterDataParaDjangoFormat(arg.event.start);
           var endFormatted = converterDataParaDjangoFormat(arg.event.end);
-          var description = arg.event.extendedProps.description || '';
+          var diagnosis = arg.event.extendedProps.diagnosis || '';
           var id = arg.event.id;
           console.log(id)
-          //var modalInputEnd = document.getElementById('end_event_detail'); 
 
           var modal = document.getElementById('detailModal')
-          var modalTitle = document.getElementById('title_event_detail'); 
           var modalStart = document.getElementById('start_event_detail'); 
           var modalEnd = document.getElementById('end_event_detail'); 
-          var modalDescripition = document.getElementById('description_event_detail'); 
+          var modalDiagnosis = document.getElementById('diagnosis_event_detail'); 
 
 
           var deleteButton = document.getElementById("delete-event-button");
@@ -268,10 +262,9 @@
 
           modal.style.display = 'block' 
           
-          modalTitle.textContent = title;
           modalStart.value = startFormatted;
           modalEnd.value = endFormatted;
-          modalDescripition.textContent = description;
+          modalDiagnosis.textContent = diagnosis;
           
          
           modal.style.display = 'block';
@@ -332,7 +325,7 @@
         console.log(eventId);
         const formData = new FormData(this);
         console.log(formData);
-        if (confirm('Are you sure you want add this event to next week?')) {
+        if (confirm('Esta seguro de que desea actualizar el evento?')) {
         $.ajax({
             url: `/update_event/${eventId}/`,
             type: 'POST',

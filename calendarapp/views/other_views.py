@@ -12,7 +12,7 @@ from django.urls import reverse_lazy, reverse
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 
-from calendarapp.models import EventMember, Event, State
+from calendarapp.models import EventMember, Event, EventCalendar
 from calendarapp.utils import Calendar
 from calendarapp.forms import EventForm, AddMemberForm
 
@@ -119,11 +119,11 @@ class TentativeEventCreateView(generic.CreateView):
 
     def form_valid(self, form):
         # Get or create the "Aprobado" state
-        state, created = State.objects.get_or_create(title="En espera", color="Yellow")
+        #state, created = State.objects.get_or_create(title="En espera", color="Yellow")
         
          # Update the event's state
         instance = form.save(commit=False)  # Get the form instance without saving it to the database
-        instance.state = state  # Set the state
+        #instance.state = state  # Set the state
         instance.save()  # Save the instance to the database
         
         form.save_m2m()  # Save the many-to-many relationships (if any)
@@ -143,14 +143,14 @@ class EventModifyStateView(generic.UpdateView):
 
     def form_valid(self, form):
         # Get or create the "Aprobado" state
-        state, created = State.objects.get_or_create(title="Aprobado", color="Blue")
-        if created:
-            print(f"New state created: {state}")
-        else:
-            print(f"Existing state used: {state}")
+        #state, created = State.objects.get_or_create(title="Aprobado", color="Blue")
+        # if created:
+        #     print(f"New state created: {state}")
+        # else:
+        #     print(f"Existing state used: {state}")
 
-        # Save the form and associate the State object
-        form.instance.state = state
+        # # Save the form and associate the State object
+        # form.instance.state = state
         form.instance.save()
         
         return redirect(self.get_success_url())
@@ -166,19 +166,16 @@ class CalendarViewNew(LoginRequiredMixin, generic.View):
 
     def get(self, request, *args, **kwargs):
         forms = self.form_class()
-        events = Event.objects.get_all_events(user=request.user)
+        events = EventCalendar.objects.all()
         events_month = Event.objects.get_running_events(user=request.user)
         event_list = []
         # start: '2020-09-16T16:00:00'
         for event in events:
-            color = event.state.color if event.state else "#0d6efd"
             event_list.append(
                 {   "id": event.id,
-                    "title": event.title,
+                    "diagnosis": event.event.diagnosis,
                     "start": event.start_time.strftime("%Y-%m-%dT%H:%M:%S"),
                     "end": event.end_time.strftime("%Y-%m-%dT%H:%M:%S"),
-                    "description": event.description, 
-                    "color": color,
                 }
             )
         
@@ -188,22 +185,15 @@ class CalendarViewNew(LoginRequiredMixin, generic.View):
 
     def post(self, request, *args, **kwargs):
         forms = self.form_class(request.POST)
-        print(forms["user"])
+        #print(forms["user"])
         if forms.is_valid():
             print("ENTRO")
-            state, created = State.objects.get_or_create(title="En espera", color="Yellow")
-            if created:
-                print(f"New state created: {state}")
-            else:
-                print(f"Existing state used: {state}")
-
-            # Save the form and associate the State object
-            event = forms.save(commit=False)
-            event.state = state
-            event.save()
+            eventCalendar = EventCalendar(event=forms.save(), start_time=forms.cleaned_data["start_time"], end_time=forms.cleaned_data["end_time"])
+            eventCalendar.save()
+            forms.save()
         
             # Save the ManyToManyField for users
-            forms.save_m2m()
+            #forms.save_m2m()
 
             return redirect("calendarapp:calendar")
         context = {"form": forms}
@@ -249,12 +239,12 @@ def next_day(request, event_id):
 @login_required
 def update_event(request, event_id):
     print("HOLA")
-    event = get_object_or_404(Event, id=event_id)
+    event = get_object_or_404(EventCalendar, id=event_id)
     print(event)
     if request.method == 'POST':
         
         #event.title = request.POST.get('title')
-        event.description = request.POST.get('description')
+        event.event.diagnosis = request.POST.get('diagnosis')
         event.start_time = request.POST.get('start_time')
         event.end_time = request.POST.get('end_time')
         event.save()
